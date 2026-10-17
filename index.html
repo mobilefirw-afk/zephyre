@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZEPHYRE CALCULATOR - Steal An Egg</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0d0f17;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .calculator-card {
+      background-color: #131722;
+      border: 1px solid #1e2433;
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      color: #8a94a6;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #d1d5db;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .input-row .input-group {
+      flex: 1;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      background-color: #0b0d14;
+      border: 1px solid #232a3b;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+    }
+
+    input::placeholder {
+      color: #4b5563;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+      transition: transform 0.1s ease, background 0.2s;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .result-box {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #0b0d14;
+      border: 1px solid #232a3b;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .result-box h3 {
+      font-size: 0.9rem;
+      color: #8a94a6;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .result-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #a855f7;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<div class="calculator-card">
+  <div class="header">
+    <h1>ZEPHYRE CALCULATOR</h1>
+    <p>Steal An Egg – AFK Speed Calculator</p>
+  </div>
+
+  <div class="input-group">
+    <label for="speedAwal">Speed Awal</label>
+    <input type="text" id="speedAwal" placeholder="Contoh: 28B" value="28B">
+  </div>
+
+  <div class="input-row">
+    <div class="input-group">
+      <label for="trailMultiplier">Trail Multiplier</label>
+      <input type="text" id="trailMultiplier" placeholder="Contoh: 1.5">
+    </div>
+    <div class="input-group">
+      <label for="multiplier">Multiplier</label>
+      <input type="text" id="multiplier" placeholder="Contoh: 2">
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label for="treadmillSpeed">Treadmill Speed</label>
+    <input type="text" id="treadmillSpeed" placeholder="Contoh: 3K">
+  </div>
+
+  <div class="input-row">
+    <div class="input-group" style="flex: 1.5;">
+      <label for="durasiAfk">Durasi AFK</label>
+      <input type="number" id="durasiAfk" value="1">
+    </div>
+    <div class="input-group" style="flex: 1;">
+      <label for="satuanWaktu">&nbsp;</label>
+      <select id="satuanWaktu">
+        <option value="hari">Hari</option>
+        <option value="jam">Jam</option>
+        <option value="menit">Menit</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="hitungSpeed()">HITUNG SPEED</button>
+
+  <div class="result-box" id="resultBox">
+    <h3>Hasil Perhitungan:</h3>
+    <div class="result-value" id="resultText">0</div>
+  </div>
+</div>
+
+<script>
+  const suffixes = {
+    'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12,
+    'q': 1e15, 'Q': 1e18, 's': 1e21, 'S': 1e24
+  };
+
+  function parseRobloxNumber(val) {
+    if (!val) return 0;
+    val = val.toString().trim();
+    let lastChar = val.slice(-1);
+    let numberPart = val;
+    let multiplier = 1;
+
+    if (suffixes[lastChar] !== undefined) {
+      multiplier = suffixes[lastChar];
+      numberPart = val.slice(0, -1);
+    }
+
+    numberPart = numberPart.replace(',', '.');
+    let parsed = parseFloat(numberPart);
+    return isNaN(parsed) ? 0 : parsed * multiplier;
+  }
+
+  function formatRobloxNumber(num) {
+    if (num >= 1e24) return (num / 1e24).toFixed(2) + 'S';
+    if (num >= 1e21) return (num / 1e21).toFixed(2) + 's';
+    if (num >= 1e18) return (num / 1e18).toFixed(2) + 'Q';
+    if (num >= 1e15) return (num / 1e15).toFixed(2) + 'q';
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+    if (num >= 1e9)  return (num / 1e9).toFixed(2) + 'B';
+    if (num >= 1e6)  return (num / 1e6).toFixed(2) + 'M';
+    if (num >= 1e3)  return (num / 1e3).toFixed(2) + 'K';
+    return num.toLocaleString('id-ID');
+  }
+
+  function hitungSpeed() {
+    let speedAwal = parseRobloxNumber(document.getElementById('speedAwal').value);
+    let trailMult = parseFloat(document.getElementById('trailMultiplier').value) || 1;
+    let mult = parseFloat(document.getElementById('multiplier').value) || 1;
+    let treadmill = parseRobloxNumber(document.getElementById('treadmillSpeed').value);
+    let durasi = parseFloat(document.getElementById('durasiAfk').value) || 0;
+    let satuan = document.getElementById('satuanWaktu').value;
+
+    let totalDetik = durasi;
+    if (satuan === 'jam') totalDetik = durasi * 3600;
+    if (satuan === 'hari') totalDetik = durasi * 86400;
+    if (satuan === 'menit') totalDetik = durasi * 60;
+
+    let penambahanPerDetik = treadmill * trailMult * mult;
+    let totalSpeedAkhir = speedAwal + (penambahanPerDetik * totalDetik);
+
+    let resultBox = document.getElementById('resultBox');
+    let resultText = document.getElementById('resultText');
+
+    resultText.innerHTML = `Total Speed: <b>${formatRobloxNumber(totalSpeedAkhir)}</b>`;
+    resultBox.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
